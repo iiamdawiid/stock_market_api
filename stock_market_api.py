@@ -4,12 +4,6 @@ from api_key import API_KEY
 import sys
 from datetime import datetime
 
-# API_URL = f'https://api.polygon.io/v1/open-close/AAPL/2023-01-09?adjusted=true&apiKey={API_KEY}'
-
-# response = requests.get(API_URL)
-# data = response.json()
-# print(json.dumps(data, indent=4))
-
 
 def main():
     start_menu()
@@ -90,16 +84,19 @@ def crypto_menu():
 def validate_date(date):
     try:
         valid_date = datetime.strptime(date, "%Y-%m-%d")
+        if valid_date > datetime.now():
+            print("Date can not be in the future.")
+            return False
         # return True will only execute if valid date format; else exception is raised
         return True
-    
+
     except ValueError:
         print("Invalid date format. Please enter date in YYYY-MM-DD format.")
         return False
 
 
 def get_stock_info():
-    # ask user to input the ticker for whatever stock they want 
+    # ask user to input the ticker for whatever stock they want
     print("\n" + "STOCKS: Open/Close".center(30, "="))
     while True:
         try:
@@ -112,7 +109,7 @@ def get_stock_info():
 
         except ValueError as e:
             print(e)
-    
+
     while True:
         date = input("Enter any date (YYYY-MM-DD): ")
         # check to see if date entered is valid
@@ -122,14 +119,30 @@ def get_stock_info():
     fetch_stock_info(stock_ticker, date)
 
 
-def fetch_stock_info(stock_ticker, date): ...
+def fetch_stock_info(stock_ticker, date):
     # here is where we will make an api call and receive Open/Close data for stock on specified date
+    API_URL = f"https://api.polygon.io/v1/open-close/{stock_ticker}/{date}?adjusted=true&apiKey={API_KEY}"
+
+    try:
+        response = requests.get(API_URL)
+        # response.raise_for_status() automatically raises exception for HTTP error status codes
+        # makes it easier to handle server-side errors without manually checking the response.status_code after each api call
+        response.raise_for_status()
+        data = response.json()
+
+        if "error" in data:
+            print(f"Error: {data['error']}")
+        else:
+            print(json.dumps(data, indent=4))
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error: {e}")
 
 
 def get_crypto_info(): ...
 
 
-def fetch_stock_info(): ...
+def fetch_crypto_info(): ...
 
 
 if __name__ == "__main__":

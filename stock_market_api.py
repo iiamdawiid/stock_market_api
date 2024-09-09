@@ -50,24 +50,46 @@ def stock_menu():
         try:
             stock_menu_choice = int(input("Enter choice: "))
             # will have to alter conditional later if more options added
-            if stock_menu_choice == 0:
-                start_menu()
-            elif stock_menu_choice == 1:
-                # call func to collect stock choice from user
-                get_stock_info()
-            else:
+            if stock_menu_choice not in {0, 1}:
                 print("Invalid input. Please enter a valid choice.")
+            else:
+                break
+
         except ValueError:
             print("Invalid input. Please enter a number.")
+
+    if stock_menu_choice == 0:
+        start_menu()
+    elif stock_menu_choice == 1:
+        # call func to collect stock choice from user
+        get_stock_info()
+
+
+def crypto_menu():
+    print("\n" + "CRYPTO".center(30, "="))
+    print("0: Go Back\n1: Daily Open/Close")
+    print("".center(30, "="))
+    while True:
+        try:
+            crypto_menu_choice = int(input("Enter choice: "))
+            if crypto_menu_choice not in {0, 1}:
+                print("Invalid input. Please enter a valid choice.")
+            else:
+                break
+
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+
+    if crypto_menu_choice == 0:
+        start_menu()
+    elif crypto_menu_choice == 1:
+        get_crypto_info()
 
 
 def get_stock_info(): ...
 
 
 def fetch_stock_info(): ...
-
-
-def crypto_menu(): ...
 
 
 def get_crypto_info(): ...

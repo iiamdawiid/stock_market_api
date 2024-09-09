@@ -2,6 +2,7 @@ import requests
 import json
 from api_key import API_KEY
 import sys
+from datetime import datetime
 
 # API_URL = f'https://api.polygon.io/v1/open-close/AAPL/2023-01-09?adjusted=true&apiKey={API_KEY}'
 
@@ -86,10 +87,43 @@ def crypto_menu():
         get_crypto_info()
 
 
-def get_stock_info(): ...
+def validate_date(date):
+    try:
+        valid_date = datetime.strptime(date, "%Y-%m-%d")
+        # return True will only execute if valid date format; else exception is raised
+        return True
+    
+    except ValueError:
+        print("Invalid date format. Please enter date in YYYY-MM-DD format.")
+        return False
 
 
-def fetch_stock_info(): ...
+def get_stock_info():
+    # ask user to input the ticker for whatever stock they want 
+    print("\n" + "STOCKS: Open/Close".center(30, "="))
+    while True:
+        try:
+            stock_ticker = input("Enter stock ticker symbol: ").upper()
+
+            if not stock_ticker.isalpha():
+                raise ValueError("Invalid input. Please enter valid ticker symbol.")
+            else:
+                break
+
+        except ValueError as e:
+            print(e)
+    
+    while True:
+        date = input("Enter any date (YYYY-MM-DD): ")
+        # check to see if date entered is valid
+        if validate_date(date):
+            break
+
+    fetch_stock_info(stock_ticker, date)
+
+
+def fetch_stock_info(stock_ticker, date): ...
+    # here is where we will make an api call and receive Open/Close data for stock on specified date
 
 
 def get_crypto_info(): ...

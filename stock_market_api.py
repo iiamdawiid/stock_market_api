@@ -3,6 +3,12 @@ import json
 from api_key import API_KEY
 import sys
 from datetime import datetime
+from tabulate import tabulate
+
+RED = '\033[91m'
+GREEN = "\033[92m"
+YELLOW = "\033[93m"
+RESET = "\033[0m"
 
 
 def main():
@@ -119,30 +125,76 @@ def get_stock_info():
     fetch_stock_info(stock_ticker, date)
 
 
+def get_crypto_info():
+    print("\n" + "STOCKS: Open/Close".center(30, "="))
+    while True:
+        try:
+            crypto_ticker = input("Enter crypto ticker symbol: ").upper()
+
+            if not crypto_ticker.isalpha():
+                raise ValueError("Invalid input. Please enter valid ticker symbol.")
+            else:
+                break
+
+        except ValueError as e:
+            print(e)
+
+    while True:
+        date = input("Enter any date (YYYY-MM-DD): ")
+        if validate_date(date):
+            break
+
+    fetch_crypto_info(crypto_ticker, date)
+
+
 def fetch_stock_info(stock_ticker, date):
     # here is where we will make an api call and receive Open/Close data for stock on specified date
-    API_URL = f"https://api.polygon.io/v1/open-close/{stock_ticker}/{date}?adjusted=true&apiKey={API_KEY}"
+    STOCK_API_URL = f"https://api.polygon.io/v1/open-close/{stock_ticker}/{date}?adjusted=true&apiKey={API_KEY}"
 
     try:
-        response = requests.get(API_URL)
+        response = requests.get(STOCK_API_URL)
         # response.raise_for_status() automatically raises exception for HTTP error status codes
         # makes it easier to handle server-side errors without manually checking the response.status_code after each api call
         response.raise_for_status()
         data = response.json()
 
-        if "error" in data:
-            print(f"Error: {data['error']}")
+        if data.get("status") == "NOT FOUND":
+            print(f"Error: {data['message']}")
         else:
-            print(json.dumps(data, indent=4))
+            # use tabulate to display data
+            # print(json.dumps(data, indent=4))
+            table = [
+                ["Date", data["from"]],
+                ["Symbol", f'{RED}{data["symbol"]}{RESET}'],
+                ["Pre-Market", f'{YELLOW}{data["preMarket"]}{RESET}'],
+                ["Open", f'{GREEN}{data["open"]}{RESET}'],
+                ["High", f'{GREEN}{data["high"]}{RESET}'],
+                ["Low", f'{GREEN}{data["low"]}{RESET}'],
+                ["Close", f'{GREEN}{data["close"]}{RESET}'],
+                ["After-Hours", f'{YELLOW}{data["afterHours"]:.2f}{RESET}'],
+                ["Volume", f'{RED}{data["volume"]}{RESET}'],
+            ]
+            print(tabulate(table, tablefmt="heavy_grid"))
 
     except requests.exceptions.RequestException as e:
         print(f"Error: {e}")
 
 
-def get_crypto_info(): ...
+def fetch_crypto_info(crypto_ticker, date):
+    CRYPTO_API_URL = f"https://api.polygon.io/v1/open-close/crypto/{crypto_ticker}/USD/{date}?adjusted=true&apiKey={API_KEY}"
 
+    try:
+        response = requests.get(CRYPTO_API_URL)
+        response.raise_for_status()
+        data = response.json()
 
-def fetch_crypto_info(): ...
+        if data.get("open") == 0:
+            print(f"Error: Crypto not found")
+        else:
+            print(json.dumps(data, indent=4))
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error: {e}")
 
 
 if __name__ == "__main__":
